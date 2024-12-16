@@ -1,0 +1,91 @@
+# ReportAI Workspace Rules
+
+## Project Overview
+- This is a Report Generator application using FastAPI and LLama workflows
+- Primary goal: Generate professional internship reports using AI
+- Target users: Students and academic supervisors
+
+## Project-Specific Guidelines
+
+### Architecture Rules
+1. **FastAPI Backend Structure**
+   - Maintain modular architecture with clear separation of concerns
+   - Use dependency injection for services
+   - Implement repository pattern for data access
+   - Follow RESTful API design principles
+
+2. **Report Generation Flow**
+   - Implement clear pipeline for report generation
+   - Use LLama workflows for content generation
+   - Include validation steps for generated content
+   - Maintain templates for different report types
+
+3. **Data Models**
+   - Keep user profiles separate from report data
+   - Implement versioning for report drafts
+   - Use clear naming conventions for all models
+   - Include validation rules for all input data
+
+### Development Guidelines
+1. **Code Organization**
+   - Place all AI-related logic in `app/services/ai`
+   - Keep report templates in `app/templates`
+   - Store user management in `app/services/users`
+   - Maintain clear API versioning
+
+2. **Testing Requirements**
+   - Test all report generation flows
+   - Include AI response validation tests
+   - Test user authentication flows
+   - Validate report format outputs
+
+3. **Documentation Needs**
+   - Document all AI integration points
+   - Maintain clear API documentation
+   - Include examples for each report type
+   - Document error handling procedures
+
+### Security Requirements
+1. **Authentication**
+   - Implement JWT-based authentication
+   - Use role-based access control
+   - Secure report access by user role
+   - Log all report generation attempts
+
+2. **Data Protection**
+   - Encrypt sensitive report data
+   - Implement backup procedures
+   - Handle user data according to privacy laws
+   - Secure AI model interactions
+
+### AI Integration Rules
+1. **LLama Workflow Guidelines**
+   - Use specific prompts for report sections
+   - Implement retry logic for AI calls
+   - Cache common AI responses
+   - Validate AI outputs before saving
+
+2. **Report Generation Rules**
+   - Follow academic report standards
+   - Include customizable templates
+   - Support multiple languages
+   - Allow manual editing of AI-generated content
+
+### Quality Assurance
+1. **Code Quality**
+   - Maintain test coverage above 80%
+   - Use type hints consistently
+   - Follow PEP 8 style guide
+   - Regular security audits
+
+2. **Performance Requirements**
+   - Report generation under 30 seconds
+   - API response time under 200ms
+   - Efficient database queries
+   - Proper error handling
+
+### Learning Focus
+- Explain all AI integration decisions
+- Document architectural choices
+- Provide context for design patterns
+- Include learning resources in comments
