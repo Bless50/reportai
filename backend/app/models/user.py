@@ -14,14 +14,12 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
     full_name = Column(String)
-    department = Column(String)
     level = Column(String)
     institution = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
 
-# optional: Add string representation of user object 
+    # optional: Add string representation of user object 
     def __repr__(self):
         return f"<User {self.email}>"
-     

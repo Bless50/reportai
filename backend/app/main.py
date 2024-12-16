@@ -1,9 +1,16 @@
 # Import FastAPI and CORS middleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 # Import our user router
 from app.api.v1.endpoints.user import router as user_router
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 # Create FastAPI app instance
 app = FastAPI(
