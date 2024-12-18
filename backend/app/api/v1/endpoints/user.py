@@ -52,7 +52,6 @@ def create_user(
         email=user_in.email,
         password=hashed_password,  # Store hashed password
         full_name=user_in.full_name,
-        department=user_in.department,
         level=user_in.level,
         institution=user_in.institution
     )
