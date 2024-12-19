@@ -3,8 +3,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-# Import our user router
+# Import our routers
 from app.api.v1.endpoints.user import router as user_router
+from app.api.v1.endpoints.report import router as report_router
 
 # Configure logging
 logging.basicConfig(
@@ -33,6 +34,12 @@ app.include_router(
     user_router,
     prefix="/api/v1/users",  # All user routes start with /api/v1/users
     tags=["users"]  # For API documentation
+)
+
+app.include_router(
+    report_router,
+    prefix="/api/v1/reports",  # All report routes start with /api/v1/reports
+    tags=["reports"]  # For API documentation
 )
 
 # Root endpoint
