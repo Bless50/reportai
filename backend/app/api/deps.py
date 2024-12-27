@@ -1,15 +1,14 @@
-from typing import Generator, Optional
+from typing import Generator
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/users/login")
+security = HTTPBearer()
 
 def get_db() -> Generator:
     """
@@ -23,7 +22,7 @@ def get_db() -> Generator:
 
 async def get_current_user(
     db: Session = Depends(get_db),
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(security)
 ) -> User:
     """
     Get current user from JWT token
@@ -34,10 +33,13 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # Decode the minimal token
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token.credentials,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
         )
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")  # Using standard "sub" claim
         if user_id is None:
             raise credentials_exception
     except JWTError:

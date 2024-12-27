@@ -1,16 +1,41 @@
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.schemas.report import Report, ReportCreate
-from app.services.report import ReportService
 from app.models.user import User
+from app.schemas.report import Report, ReportCreate, ReportUpdate
+from app.services.report import ReportService
 
 router = APIRouter()
 
-@router.post("/", response_model=Report)
+@router.get("/{report_id}", response_model=Report)
+def get_report(
+    report_id: UUID,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> Report:
+    """Get a specific report by ID"""
+    report_service = ReportService(db)
+    report = report_service.get_report(report_id, current_user.id)
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found"
+        )
+    return report
+
+@router.get("/", response_model=List[Report])
+def list_reports(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> List[Report]:
+    """List all reports for current user"""
+    report_service = ReportService(db)
+    return report_service.list_user_reports(current_user.id)
+
+@router.post("/", response_model=Report, status_code=status.HTTP_201_CREATED)
 def create_report(
     report_in: ReportCreate,
     db: Session = Depends(deps.get_db),
@@ -20,43 +45,35 @@ def create_report(
     report_service = ReportService(db)
     return report_service.create_report(report_in, current_user.id)
 
-@router.get("/{report_id}", response_model=Report)
-def get_report(
+@router.put("/{report_id}", response_model=Report)
+def update_report(
     report_id: UUID,
+    report_in: ReportUpdate,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
 ) -> Report:
-    """Get a specific report"""
+    """Update an existing report"""
     report_service = ReportService(db)
-    report = report_service.get_report(report_id)
+    report = report_service.get_report(report_id, current_user.id)
     if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    return report
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found"
+        )
+    return report_service.update_report(report_id, current_user.id, report_in)
 
-@router.get("/", response_model=List[Report])
-def list_reports(
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user)
-) -> List[Report]:
-    """List all reports for the current user"""
-    report_service = ReportService(db)
-    return report_service.list_user_reports(current_user.id)
-
-@router.delete("/{report_id}")
+@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_report(
     report_id: UUID,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
-) -> dict:
+) -> None:
     """Delete a report"""
     report_service = ReportService(db)
-    report = report_service.get_report(report_id)
+    report = report_service.get_report(report_id, current_user.id)
     if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    
-    report_service.delete_report(report_id)
-    return {"message": "Report deleted successfully"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found"
+        )
+    report_service.delete_report(report_id, current_user.id)

@@ -1,55 +1,41 @@
-# Import FastAPI and CORS middleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
+from app.api.v1.endpoints import user, report
+from app.core.config import settings
 
-# Import our routers
-from app.api.v1.endpoints.user import router as user_router
-from app.api.v1.endpoints.report import router as report_router
-
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-# Create FastAPI app instance
 app = FastAPI(
     title="ReportAI API",
     description="API for generating internship reports",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    openapi_tags=[
+        {
+            "name": "authentication",
+            "description": "User authentication operations (register, login, logout)"
+        },
+        {
+            "name": "profile",
+            "description": "User profile operations (view, update, delete)"
+        },
+        {
+            "name": "reports",
+            "description": "Report management operations"
+        }
+    ]
 )
 
-# Configure CORS
+# Add CORS middleware with specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["http://localhost:3000", "http://localhost:8000"],  # Specify allowed origins
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],  # Can be restricted to ["GET", "POST", "PUT", "DELETE"]
+    allow_headers=["*"],  # Can be restricted to specific headers
+    max_age=600  # Cache preflight requests for 10 minutes
 )
 
-# Include our routers
-app.include_router(
-    user_router,
-    prefix="/api/v1/users",  # All user routes start with /api/v1/users
-    tags=["users"]  # For API documentation
-)
-
-app.include_router(
-    report_router,
-    prefix="/api/v1/reports",  # All report routes start with /api/v1/reports
-    tags=["reports"]  # For API documentation
-)
-
-# Root endpoint
-@app.get("/")
-def read_root():
-    """
-    Root endpoint - can be used to check if API is running
-    """
-    return {
-        "message": "Welcome to ReportAI API",
-        "version": "1.0.0",
-        "status": "active"
-    }
+# Include routers with base prefix
+app.include_router(user.router, prefix="/api/v1/users")
+app.include_router(report.router, prefix="/api/v1/reports")

@@ -89,3 +89,10 @@
 - Document architectural choices
 - Provide context for design patterns
 - Include learning resources in comments
+
+[guidelines]
+1. Always explain the root cause of problems before implementing fixes
+2. Document all schema changes and their impact on the API
+3. Keep track of authentication and security configurations
+4. Maintain clear documentation of API endpoints and their requirements
+

@@ -8,6 +8,7 @@ from alembic import context
 # Add these imports
 from app.models.base import Base
 from app.models.user import User  # Import all models
+from app.models.report import Report  # Add this line
 from app.core.database import DATABASE_URL
 
 # this is the Alembic Config object
