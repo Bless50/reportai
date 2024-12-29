@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 # import base class from base.py
-from .base import Base
+from app.db.base_class import Base
 
 #define user model model that inherits from Base
 class User(Base):

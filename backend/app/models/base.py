@@ -1,8 +1,10 @@
 # import the necessary function from SQLALCHEMY
 # declarative_base() is used to create a base class for our database models
-from sqlalchemy.ext.declarative import declarative_base
+from app.db.base_class import Base
 
-# create a base class for our database models
-# this class will be used as a base class for all our database models
-#it provides them  with the necessary functionality to work with the sqlachemy
-Base = declarative_base()
+# Import all models here that need to be discovered by Alembic
+from app.models.user import User  # noqa
+from app.models.report import Report  # noqa
+from app.models.chapter import Chapter  # noqa
+from app.models.section import Section  # noqa
+from app.models.file_upload import FileUpload  # noqa

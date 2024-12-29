@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import user, report
+from app.api.v1.api import api_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -20,22 +20,24 @@ app = FastAPI(
             "description": "User profile operations (view, update, delete)"
         },
         {
-            "name": "reports",
-            "description": "Report management operations"
+            "name": "report-management",
+            "description": "Report and chapter management operations"
+        },
+        {
+            "name": "content-management",
+            "description": "Section content operations (type, upload, generate AI content, files)"
         }
     ]
 )
 
-# Add CORS middleware with specific origins
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8000"],  # Specify allowed origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Can be restricted to ["GET", "POST", "PUT", "DELETE"]
-    allow_headers=["*"],  # Can be restricted to specific headers
-    max_age=600  # Cache preflight requests for 10 minutes
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Include routers with base prefix
-app.include_router(user.router, prefix="/api/v1/users")
-app.include_router(report.router, prefix="/api/v1/reports")
+# Include API router
+app.include_router(api_router, prefix="/api/v1")

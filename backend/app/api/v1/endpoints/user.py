@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
+from typing import Any, List
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
+
+from app.api import deps
+from app.core.security import get_password_hash, verify_password
+from app.models.user import User
+from app.schemas import user as schemas
 from datetime import datetime
 from jose import jwt
-
-from app.api.deps import get_db, get_current_user
-from app.schemas import user as schemas
-from app.core.security import verify_password, get_password_hash
 from app.core.config import settings
-from app.models.user import User
 
 router = APIRouter()
 
@@ -22,7 +24,7 @@ router = APIRouter()
 )
 async def create_user(
     user_in: schemas.UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(deps.get_db)
 ):
     """
     Create new user with the following fields:
@@ -63,7 +65,7 @@ async def create_user(
 )
 async def login(
     user_in: schemas.UserLogin,
-    db: Session = Depends(get_db)
+    db: Session = Depends(deps.get_db)
 ):
     """
     Login with the following fields:
@@ -102,7 +104,7 @@ async def login(
     tags=["profile"]
 )
 async def read_user_me(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(deps.get_current_user)
 ):
     """
     Get current authenticated user's profile.
@@ -117,7 +119,7 @@ async def read_user_me(
     description="Logout current user",
     tags=["authentication"]
 )
-async def logout(current_user: User = Depends(get_current_user)):
+async def logout(current_user: User = Depends(deps.get_current_user)):
     """
     Logout current authenticated user.
     Requires Bearer token authentication.
@@ -133,8 +135,8 @@ async def logout(current_user: User = Depends(get_current_user)):
 )
 async def update_user(
     user_in: schemas.UserUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db)
 ):
     """
     Update current user profile with optional fields.
@@ -163,8 +165,8 @@ async def update_user(
     tags=["profile"]
 )
 async def delete_user(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db)
 ):
     """
     Delete current authenticated user's account.
