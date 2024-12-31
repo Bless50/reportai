@@ -64,20 +64,20 @@ async def upload_section_content(
     return {"message": "Content uploaded and saved as context"}
 
 @router.post("/{section_id}/generate", 
-    summary="Generate AI content for section",
-    description="Generate final content using AI based on research and context"
+    response_model=dict,
+    summary="Generate content for section",
+    description="Generate final content for a section using AI"
 )
 async def generate_content(
     section_id: UUID,
     current_user: User = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db)
 ):
-    """Generate final content using AI"""
+    """Generate final content for a section using AI"""
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
         raise HTTPException(status_code=404, detail="Section not found")
     
-    # Verify user has access to this section's report
     if section.chapter.report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this section")
     
@@ -95,7 +95,7 @@ async def generate_content(
         }
     }
     
-    final_content = generate_section_content(context)
+    final_content = await generate_section_content(context)
     section.content = final_content
     db.commit()
     

@@ -3,18 +3,24 @@ Core module for AI content generation.
 This will be expanded with actual AI implementation.
 """
 
-async def generate_section_content(section_number: str, user_content: str = None) -> str:
+async def generate_section_content(context: dict) -> str:
     """
     Generate content for a section using AI.
-    Uses user's content as context if available.
+    Uses provided context for generation.
     
     Args:
-        section_number: Section number (e.g., "1.1", "2.3")
-        user_content: Optional content provided by user to use as context
+        context: Dictionary containing section context including:
+                - report_title
+                - department
+                - chapter_number
+                - chapter_title
+                - section_number
+                - section_title
+                - user_context (typed_content, uploaded_content)
         
     Returns:
         Generated content as string
     """
     # TODO: Implement actual AI generation
     # This is where we'll integrate the AI agents
-    return "Generated content placeholder"
+    return f"Generated content for section {context['section_number']}: {context['section_title']}"

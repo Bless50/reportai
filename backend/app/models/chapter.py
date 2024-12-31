@@ -23,7 +23,12 @@ class Chapter(Base):
 
     # Relationships
     report = relationship("Report", back_populates="chapters")
-    sections = relationship("Section", back_populates="chapter", cascade="all, delete-orphan")
+    sections = relationship(
+        "Section", 
+        back_populates="chapter", 
+        cascade="all, delete-orphan",
+        order_by="Section.section_number"
+    )
 
     def __repr__(self):
         return f"<Chapter {self.chapter_number}: {self.title}>"
