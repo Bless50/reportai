@@ -1,17 +1,30 @@
-from typing import List, Optional
+from typing import List
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
 
-from .section import SectionResponse
+from app.schemas.section import SectionResponse
 
-class ChapterResponse(BaseModel):
-    """Schema for reading chapter data with its sections"""
+class ChapterBase(BaseModel):
+    """Base Chapter Schema"""
+    chapter_number: int
+    title: str
+
+class ChapterCreate(ChapterBase):
+    """Create Chapter Schema"""
+    pass
+
+class ChapterUpdate(ChapterBase):
+    """Update Chapter Schema"""
+    pass
+
+class ChapterResponse(ChapterBase):
+    """Response Chapter Schema"""
     id: UUID
     report_id: UUID
-    chapter_number: int  # 1,2,3,4,5
-    title: str
     sections: List[SectionResponse] = []
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

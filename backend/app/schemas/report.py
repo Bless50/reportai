@@ -1,28 +1,36 @@
+from typing import List, Optional
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel
-from enum import Enum
+from pydantic import BaseModel, Field
 
-class ReportStatus(str, Enum):
-    DRAFT = "draft"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
+# Import ReportStatus from models
+from app.models.report import ReportStatus
+from app.schemas.chapter import ChapterResponse
 
 class ReportBase(BaseModel):
-    """Base schema for Report with common attributes"""
-    title: str
-    department: str
+    """Base Report Schema"""
+    title: str = Field(..., description="Report title")
+    department: str = Field(..., description="Department or field of study")
 
 class ReportCreate(ReportBase):
-    """Schema for creating a new report"""
+    """Create Report Schema"""
     pass
 
 class ReportUpdate(ReportBase):
-    """Schema for updating an existing report"""
-    title: Optional[str] = None
-    department: Optional[str] = None
-    status: Optional[ReportStatus] = None
+    """Update Report Schema"""
+    pass
+
+class ReportResponse(ReportBase):
+    """Response Report Schema"""
+    id: UUID
+    user_id: UUID
+    chapters: List[ChapterResponse] = []
+    created_at: datetime
+    updated_at: datetime
+    status: str  # Changed to str to avoid validation issues
+
+    class Config:
+        from_attributes = True
 
 class ReportInDB(ReportBase):
     """Schema for Report as stored in database"""

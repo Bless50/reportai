@@ -12,15 +12,14 @@ from datetime import datetime
 from jose import jwt
 from app.core.config import settings
 
-router = APIRouter()
+router = APIRouter(tags=["users"])
 
 @router.post(
     "/register", 
     response_model=schemas.UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    description="Create a new user account with the required information",
-    tags=["authentication"]
+    description="Create a new user account with the required information"
 )
 async def create_user(
     user_in: schemas.UserCreate,
@@ -60,8 +59,7 @@ async def create_user(
     "/login", 
     response_model=schemas.Token,
     summary="Login user",
-    description="Login with email and password to get access token",
-    tags=["authentication"]
+    description="Login with email and password to get access token"
 )
 async def login(
     user_in: schemas.UserLogin,
@@ -100,8 +98,7 @@ async def login(
     "/me", 
     response_model=schemas.UserResponse,
     summary="Get current user",
-    description="Get current user profile information",
-    tags=["profile"]
+    description="Get current user profile information"
 )
 async def read_user_me(
     current_user: User = Depends(deps.get_current_user)
@@ -116,8 +113,7 @@ async def read_user_me(
     "/logout",
     status_code=status.HTTP_200_OK,
     summary="Logout user",
-    description="Logout current user",
-    tags=["authentication"]
+    description="Logout current user"
 )
 async def logout(current_user: User = Depends(deps.get_current_user)):
     """
@@ -130,8 +126,7 @@ async def logout(current_user: User = Depends(deps.get_current_user)):
     "/me", 
     response_model=schemas.UserResponse,
     summary="Update current user",
-    description="Update current user's profile information",
-    tags=["profile"]
+    description="Update current user's profile information"
 )
 async def update_user(
     user_in: schemas.UserUpdate,
@@ -161,8 +156,7 @@ async def update_user(
     "/me",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete current user",
-    description="Delete current user's account",
-    tags=["profile"]
+    description="Delete current user's account"
 )
 async def delete_user(
     current_user: User = Depends(deps.get_current_user),

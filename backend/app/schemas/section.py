@@ -22,7 +22,7 @@ class SectionResponse(BaseModel):
     content: Optional[str] = None
     uploaded_content: Optional[str] = None
     ai_content: Optional[str] = None
-    source_type: ContentSourceType
+    source_type: Optional[ContentSourceType] = ContentSourceType.USER_UPLOADED
     has_files: bool = False
     files_metadata: Optional[Dict[str, Any]] = None
 

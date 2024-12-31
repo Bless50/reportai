@@ -1,10 +1,11 @@
 from datetime import datetime
 from uuid import UUID, uuid4
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, JSON
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, JSON, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
+from app.models.enums import ContentSourceType
 
 class Section(Base):
     """
@@ -25,6 +26,7 @@ class Section(Base):
     content = Column(Text)  # Final content
     uploaded_content = Column(Text)  # User uploaded/typed content
     ai_content = Column(Text)  # AI generated content
+    source_type = Column(SQLEnum(ContentSourceType), nullable=False, default=ContentSourceType.USER_UPLOADED)
     
     # Metadata
     word_count = Column(Integer, default=0)
