@@ -4,28 +4,36 @@ This will be expanded with actual AI implementation.
 """
 
 from app.models.report import Report
+from app.models.section import Section
 
-async def generate_section_content(context: dict) -> str:
+async def generate_section_content(section: Section) -> str:
     """
     Generate content for a section using AI.
     Uses provided context for generation.
     
     Args:
-        context: Dictionary containing section context including:
-                - report_title
-                - department
-                - chapter_number
-                - chapter_title
-                - section_number
-                - section_title
-                - user_context (typed_content, uploaded_content)
+        section: The Section model instance to generate content for
         
     Returns:
         Generated content as string
     """
+    # Build context from section and its relationships
+    context = {
+        "report_title": section.chapter.report.title,
+        "department": section.chapter.report.department,
+        "chapter_number": section.chapter.chapter_number,
+        "chapter_title": section.chapter.title,
+        "section_number": section.section_number,
+        "section_title": section.title,
+        "user_context": {
+            "typed_content": section.typed_content,
+            "uploaded_content": section.uploaded_content
+        }
+    }
+    
     # TODO: Implement actual AI generation
     # This is where we'll integrate the AI agents
-    return f"Generated content for section {context['section_number']}: {context['section_title']}"
+    return f"Generated content for section {section.section_number}: {section.title}"
 
 async def generate_references_page(report: Report) -> str:
     """
