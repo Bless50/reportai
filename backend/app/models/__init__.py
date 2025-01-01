@@ -1,8 +1,9 @@
-from app.models.user import User
-from app.models.report import Report
-from app.models.chapter import Chapter
-from app.models.section import Section
-from app.models.file_upload import FileUpload
+from .user import User
+from .report import Report
+from .chapter import Chapter
+from .section import Section
+from .file_upload import FileUpload
+from .reference import Reference
 
 # This ensures all models are imported and available for SQLAlchemy
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     "Report",
     "Chapter",
     "Section",
-    "FileUpload"
+    "FileUpload",
+    "Reference"
 ]

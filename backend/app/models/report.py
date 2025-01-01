@@ -28,6 +28,7 @@ class Report(Base):
     # Relationships
     user = relationship("User", back_populates="reports")
     chapters = relationship("Chapter", back_populates="report", cascade="all, delete-orphan", lazy="joined")
+    references = relationship("Reference", back_populates="report", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Report {self.title}>"

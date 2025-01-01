@@ -5,6 +5,23 @@ from datetime import datetime
 
 from app.models.enums import ContentSourceType
 
+class SectionBase(BaseModel):
+    """Base Section Schema"""
+    section_number: str = Field(..., description="Section number (e.g., '1.1', '1.2')")
+    title: str = Field(..., description="Section title")
+    level: int = Field(..., description="Section level (1 for main sections, 2 for subsections)")
+
+class SectionCreate(SectionBase):
+    """Schema for creating a new section"""
+    chapter_id: UUID = Field(..., description="ID of the chapter this section belongs to")
+
+class SectionUpdate(BaseModel):
+    """Schema for updating an existing section"""
+    section_number: Optional[str] = None
+    title: Optional[str] = None
+    content: Optional[str] = None
+    level: Optional[int] = None
+
 class SectionContent(BaseModel):
     """Schema for section content operations"""
     content: str = Field(..., description="Content text for the section")
@@ -13,17 +30,24 @@ class SectionUploadContent(BaseModel):
     """Schema for uploading existing content to a section"""
     content: str = Field(..., description="Content to upload to this section")
 
-class SectionResponse(BaseModel):
-    """Schema for reading section data"""
+class SectionInDB(SectionBase):
+    """Schema for section in database"""
     id: UUID
     chapter_id: UUID
-    section_number: str  # Already normalized (e.g., "1.1", "1.2")
-    title: str
     content: Optional[str] = None
     uploaded_content: Optional[str] = None
     ai_content: Optional[str] = None
     typed_content: Optional[str] = None
-    source_type: Optional[ContentSourceType] = ContentSourceType.USER_UPLOADED
+    source_type: ContentSourceType = ContentSourceType.USER_UPLOADED
+    word_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SectionResponse(SectionInDB):
+    """Schema for reading section data"""
     has_files: bool = False
     files_metadata: Optional[Dict[str, Any]] = None
 

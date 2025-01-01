@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 from app.schemas.section import SectionResponse
@@ -10,21 +10,28 @@ class ChapterBase(BaseModel):
     chapter_number: int
     title: str
 
+    model_config = ConfigDict(from_attributes=True)
+
 class ChapterCreate(ChapterBase):
     """Create Chapter Schema"""
-    pass
+    report_id: UUID
 
 class ChapterUpdate(ChapterBase):
     """Update Chapter Schema"""
-    pass
+    chapter_number: Optional[int] = None
+    title: Optional[str] = None
 
-class ChapterResponse(ChapterBase):
-    """Response Chapter Schema"""
+class ChapterInDB(ChapterBase):
+    """Database Chapter Schema"""
     id: UUID
     report_id: UUID
-    sections: List[SectionResponse] = []
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class ChapterResponse(ChapterInDB):
+    """Response Chapter Schema"""
+    sections: List[SectionResponse] = []
+
+    model_config = ConfigDict(from_attributes=True)

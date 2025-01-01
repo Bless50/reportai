@@ -15,13 +15,17 @@ from app.services.report import ReportService
 # Set up logging
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(
+    tags=["report-management"],
+    responses={404: {"description": "Report not found"}}
+)
 
 @router.post("/", 
     response_model=ReportResponse, 
     status_code=status.HTTP_201_CREATED, 
     summary="Create new report",
-    description="Create a new report with predefined chapters"
+    description="Create a new report with predefined chapters",
+    tags=["report-management"]
 )
 async def create_report(
     report_in: ReportCreate,
@@ -49,7 +53,8 @@ async def create_report(
 @router.get("/", 
     response_model=List[ReportResponse], 
     summary="List all reports",
-    description="Get all reports for the current user"
+    description="Get all reports for the current user",
+    tags=["report-management"]
 )
 async def list_reports(
     current_user: User = Depends(deps.get_current_user),
@@ -72,7 +77,8 @@ async def list_reports(
 @router.get("/{report_id}", 
     response_model=ReportResponse, 
     summary="Get report with chapters",
-    description="Get a specific report with all its chapters"
+    description="Get a specific report with all its chapters",
+    tags=["report-management"]
 )
 async def get_report(
     report_id: UUID,
@@ -96,7 +102,8 @@ async def get_report(
 @router.get("/{report_id}/chapters/{chapter_id}", 
     response_model=ChapterResponse,
     summary="Get chapter with sections",
-    description="Get a specific chapter with all its sections"
+    description="Get a specific chapter with all its sections",
+    tags=["report-management"]
 )
 async def get_chapter(
     report_id: UUID,
@@ -134,7 +141,8 @@ async def get_chapter(
 @router.delete("/{report_id}", 
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete report",
-    description="Delete a report and all its chapters and sections"
+    description="Delete a report and all its chapters and sections",
+    tags=["report-management"]
 )
 async def delete_report(
     report_id: UUID,

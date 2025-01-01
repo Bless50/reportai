@@ -37,6 +37,10 @@ app = FastAPI(
         {
             "name": "content-management",
             "description": "Section content operations (type, upload, generate AI content, files)"
+        },
+        {
+            "name": "references",
+            "description": "Reference management operations for APA citations"
         }
     ]
 )

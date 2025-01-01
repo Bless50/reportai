@@ -203,3 +203,29 @@ class UserResponse(UserBase):
             }
         }
     )
+
+class UserInDB(UserResponse):
+    """Schema for user in database, includes hashed password"""
+    hashed_password: str = Field(
+        ...,
+        title="Hashed Password",
+        description="User's hashed password",
+        json_schema_extra={"example": "hashed_password_string"}
+    )
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "email": "user@example.com",
+                "full_name": "John Doe",
+                "level": "HND",
+                "institution": "My University",
+                "is_active": True,
+                "created_at": "2024-01-01T00:00:00Z",
+                "last_login": "2024-01-01T12:00:00Z",
+                "hashed_password": "hashed_password_string"
+            }
+        }
+    )

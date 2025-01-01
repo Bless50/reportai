@@ -1,6 +1,6 @@
 from datetime import datetime
 from uuid import UUID, uuid4
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, JSON, Enum as SQLEnum, Index
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, JSON, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 
@@ -13,9 +13,6 @@ class Section(Base):
     This is where the actual content lives.
     """
     __tablename__ = "sections"
-    __table_args__ = (
-        Index('ix_sections_chapter_section_order', 'chapter_id', 'section_number'),
-    )
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     chapter_id = Column(PostgresUUID(as_uuid=True), ForeignKey("chapters.id"))

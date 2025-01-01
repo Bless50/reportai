@@ -7,17 +7,17 @@ from uuid import UUID
 from app.api import deps
 from app.models.section import Section
 from app.models.user import User
-from app.schemas.section import SectionContent, SectionResponse
+from app.schemas.section import SectionContent, SectionResponse, SectionInDB
 from app.schemas.file_upload import FileUploadResponse
 from app.core.content_generation import generate_section_content
 
 router = APIRouter(
     prefix="/sections",
-    tags=["content-management"],
-    responses={404: {"description": "Section not found"}}
+    tags=["content-management"]
 )
 
 @router.post("/{section_id}/type-content", 
+    response_model=SectionResponse,
     summary="Add typed content to section",
     description="Add manually typed content that will be used as context for AI generation"
 )
@@ -38,9 +38,11 @@ async def add_typed_content(
     
     section.typed_content = content.content
     db.commit()
-    return {"message": "Content saved as context for AI generation"}
+    db.refresh(section)
+    return section
 
 @router.post("/{section_id}/upload-content", 
+    response_model=SectionResponse,
     summary="Upload existing content to section",
     description="Upload existing content that will be used as context for AI generation"
 )
@@ -50,7 +52,7 @@ async def upload_section_content(
     current_user: User = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db),
 ):
-    """Upload content as context for AI generation"""
+    """Upload existing content as context for AI generation"""
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
         raise HTTPException(status_code=404, detail="Section not found")
@@ -61,53 +63,13 @@ async def upload_section_content(
     
     section.uploaded_content = content.content
     db.commit()
-    return {"message": "Content uploaded and saved as context"}
+    db.refresh(section)
+    return section
 
-@router.post("/{section_id}/generate", 
-    response_model=dict,
-    summary="Generate content for section",
-    description="Generate final content for a section using AI"
-)
-async def generate_content(
-    section_id: UUID,
-    current_user: User = Depends(deps.get_current_user),
-    db: Session = Depends(deps.get_db)
-):
-    """Generate final content for a section using AI"""
-    section = db.query(Section).filter(Section.id == section_id).first()
-    if not section:
-        raise HTTPException(status_code=404, detail="Section not found")
-    
-    if section.chapter.report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to modify this section")
-    
-    # Get context for AI generation
-    context = {
-        "report_title": section.chapter.report.title,
-        "department": section.chapter.report.department,
-        "chapter_number": section.chapter.chapter_number,
-        "chapter_title": section.chapter.title,
-        "section_number": section.section_number,
-        "section_title": section.title,
-        "user_context": {
-            "typed_content": section.typed_content,
-            "uploaded_content": section.uploaded_content
-        }
-    }
-    
-    final_content = await generate_section_content(context)
-    section.content = final_content
-    db.commit()
-    
-    return {
-        "message": "Content generated successfully",
-        "content": section.content
-    }
-
-@router.get("/{section_id}/content", 
+@router.get("/{section_id}/content",
     response_model=SectionResponse,
     summary="Get section content",
-    description="Get the final generated content for a section"
+    description="Get the final content for a section"
 )
 async def get_section_content(
     section_id: UUID,
@@ -121,20 +83,42 @@ async def get_section_content(
     
     # Verify user has access to this section's report
     if section.chapter.report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this section")
+        raise HTTPException(status_code=403, detail="Not authorized to view this section")
     
-    return {
-        "id": section.id,
-        "chapter_id": section.chapter_id,
-        "section_number": section.section_number,
-        "title": section.title,
-        "content": section.content
-    }
+    return section
 
-@router.post("/{section_id}/files", 
+@router.post("/{section_id}/generate",
+    response_model=SectionResponse,
+    summary="Generate content for section",
+    description="Generate content for section using AI"
+)
+async def generate_content(
+    section_id: UUID,
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db)
+):
+    """Generate content for a section using AI"""
+    section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    # Verify user has access to this section's report
+    if section.chapter.report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this section")
+    
+    # Generate content using AI
+    generated_content = await generate_section_content(section)
+    section.ai_content = generated_content
+    section.content = generated_content  # Set as final content
+    
+    db.commit()
+    db.refresh(section)
+    return section
+
+@router.post("/{section_id}/files",
     response_model=FileUploadResponse,
     summary="Upload file to section",
-    description="Upload images, diagrams, or other files for a section"
+    description="Upload a file (image/diagram) to a section"
 )
 async def upload_file(
     section_id: UUID,
@@ -144,7 +128,7 @@ async def upload_file(
     current_user: User = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db),
 ):
-    """Upload a file (image/diagram) to a section"""
+    """Upload a file to a section"""
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
         raise HTTPException(status_code=404, detail="Section not found")
@@ -153,34 +137,26 @@ async def upload_file(
     if section.chapter.report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this section")
     
+    # Process file upload
     try:
         position = json.loads(position_data)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid position data format")
     
-    # Create file upload record
-    file_upload = FileUpload(
-        section_id=section_id,
-        filename=file.filename,
-        file_type=file.content_type,
-        file_size=0,  # Will be updated after saving
-        position_data=position,
-        caption=caption
-    )
-    
-    # Save file and update size
-    # TODO: Implement actual file storage
-    
-    db.add(file_upload)
-    db.commit()
-    db.refresh(file_upload)
-    
-    return FileUploadResponse.from_orm(file_upload)
+    # TODO: Implement file upload logic
+    # For now, just return a mock response
+    return {
+        "id": UUID('00000000-0000-0000-0000-000000000000'),
+        "filename": file.filename,
+        "file_type": file.content_type,
+        "position": position,
+        "caption": caption
+    }
 
-@router.get("/{section_id}/files", 
+@router.get("/{section_id}/files",
     response_model=List[FileUploadResponse],
     summary="Get section files",
-    description="Get all files uploaded to a specific section"
+    description="Get all files uploaded to a section"
 )
 async def get_section_files(
     section_id: UUID,
@@ -194,7 +170,8 @@ async def get_section_files(
     
     # Verify user has access to this section's report
     if section.chapter.report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this section")
+        raise HTTPException(status_code=403, detail="Not authorized to view this section")
     
-    files = db.query(FileUpload).filter(FileUpload.section_id == section_id).all()
-    return [FileUploadResponse.from_orm(file) for file in files]
+    # TODO: Implement file retrieval logic
+    # For now, just return an empty list
+    return []
