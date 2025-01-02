@@ -22,11 +22,10 @@ class Section(Base):
     title = Column(String, nullable=False)  # e.g., "Background of the study"
     level = Column(Integer, nullable=False)  # 1 for 1.1, 2 for 1.1.1
     
-    # Content
-    content = Column(Text)  # Final content
-    uploaded_content = Column(Text)  # User uploaded/typed content
+    # Content fields
+    user_content = Column(Text)  # Content provided by user
     ai_content = Column(Text)  # AI generated content
-    typed_content = Column(Text)  # Typed content from user
+    final_content = Column(Text)  # Final content after merging/editing
     source_type = Column(SQLEnum(ContentSourceType), nullable=False, default=ContentSourceType.USER_UPLOADED)
     
     # Metadata

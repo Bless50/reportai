@@ -19,25 +19,19 @@ class SectionUpdate(BaseModel):
     """Schema for updating an existing section"""
     section_number: Optional[str] = None
     title: Optional[str] = None
-    content: Optional[str] = None
     level: Optional[int] = None
 
 class SectionContent(BaseModel):
     """Schema for section content operations"""
     content: str = Field(..., description="Content text for the section")
 
-class SectionUploadContent(BaseModel):
-    """Schema for uploading existing content to a section"""
-    content: str = Field(..., description="Content to upload to this section")
-
 class SectionInDB(SectionBase):
     """Schema for section in database"""
     id: UUID
     chapter_id: UUID
-    content: Optional[str] = None
-    uploaded_content: Optional[str] = None
+    user_content: Optional[str] = None
     ai_content: Optional[str] = None
-    typed_content: Optional[str] = None
+    final_content: Optional[str] = None
     source_type: ContentSourceType = ContentSourceType.USER_UPLOADED
     word_count: int = 0
     created_at: datetime
@@ -49,7 +43,3 @@ class SectionInDB(SectionBase):
 class SectionResponse(SectionInDB):
     """Schema for reading section data"""
     has_files: bool = False
-    files_metadata: Optional[Dict[str, Any]] = None
-
-    class Config:
-        from_attributes = True

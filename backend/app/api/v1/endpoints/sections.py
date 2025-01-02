@@ -7,7 +7,7 @@ from uuid import UUID
 from app.api import deps
 from app.models.section import Section
 from app.models.user import User
-from app.schemas.section import SectionContent, SectionResponse, SectionInDB
+from app.schemas.section import SectionContent, SectionResponse
 from app.schemas.file_upload import FileUploadResponse
 from app.core.content_generation import generate_section_content
 
@@ -36,9 +36,9 @@ async def add_section_content(
     if section.chapter.report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this section")
     
-    # Store content in both fields for now, we can differentiate later if needed
-    section.typed_content = content.content
-    section.uploaded_content = content.content
+    # Store user content
+    section.user_content = content.content
+    section.final_content = content.content  # Also set as final content until AI generates
     
     # Update word count
     section.word_count = len(content.content.split())
@@ -90,7 +90,7 @@ async def generate_content(
     # Generate content using AI
     generated_content = await generate_section_content(section)
     section.ai_content = generated_content
-    section.content = generated_content  # Set as final content
+    section.final_content = generated_content  # Set as final content
     
     # Update word count
     section.word_count = len(generated_content.split())

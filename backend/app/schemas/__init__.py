@@ -3,7 +3,7 @@ from .report import ReportBase, ReportCreate, ReportUpdate, ReportInDB, ReportRe
 from .chapter import ChapterBase, ChapterCreate, ChapterUpdate, ChapterInDB, ChapterResponse
 from .section import (
     SectionBase, SectionCreate, SectionUpdate, SectionInDB, SectionResponse,
-    SectionContent, SectionUploadContent
+    SectionContent
 )
 from .file_upload import FileUploadBase, FileUploadCreate, FileUploadResponse
 from .reference import (
@@ -20,7 +20,7 @@ __all__ = [
     "ChapterBase", "ChapterCreate", "ChapterUpdate", "ChapterInDB", "ChapterResponse",
     # Section schemas
     "SectionBase", "SectionCreate", "SectionUpdate", "SectionInDB", "SectionResponse",
-    "SectionContent", "SectionUploadContent",
+    "SectionContent",
     # File upload schemas
     "FileUploadBase", "FileUploadCreate", "FileUploadResponse",
     # Reference schemas
