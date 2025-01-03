@@ -68,6 +68,38 @@ async def get_section_content(
     
     return section
 
+@router.post("/{section_id}/reset",
+    response_model=SectionResponse,
+    summary="Reset section content",
+    description="Reset a section's content while maintaining its structure. This will clear user content, AI content, and final content."
+)
+async def reset_section(
+    section_id: UUID,
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db),
+):
+    """Reset a section's content"""
+    section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    # Verify user has access to this section's report
+    if section.chapter.report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this section")
+    
+    # Reset all content fields
+    section.user_content = None
+    section.ai_content = None
+    section.final_content = None
+    section.word_count = 0
+    
+    # Reset any associated metadata
+    section.citations = None
+    
+    db.commit()
+    db.refresh(section)
+    return section
+
 @router.post("/{section_id}/generate",
     response_model=SectionResponse,
     summary="Generate content",
